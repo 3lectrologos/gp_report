@@ -1,0 +1,67 @@
+\documentclass[11pt]{article} % For LaTeX2e
+\usepackage{nips12submit_e,times}
+%\documentstyle[nips12submit_09,times,art10]{article} % For LaTeX 2.09
+
+%\usepackage[usenames,dvipsnames]{color}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage[scaled=0.8]{beramono}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\usepackage{url}
+\usepackage[hyperfootnotes=false,citecolor=RedOrange,linkcolor=RoyalBlue,urlcolor=DarkOrchid,colorlinks]{hyperref}
+\usepackage[all]{hypcap}
+
+\newcommand{\todo}[1]{\noindent\texttt{\color[rgb]{0.5,0.1,0.1} TODO: #1}}
+
+\newcommand{\sectref}[1]{\mbox{Section~\ref{#1}}}
+\newcommand{\figref}[1]{\mbox{Figure~\ref{#1}}}
+\newcommand{\tabref}[1]{\mbox{Table~\ref{#1}}}
+\renewcommand{\sectref}[1]{\hyperref[#1]{\mbox{Section~\ref*{#1}}}}
+\renewcommand{\figref}[1]{\hyperref[#1]{\mbox{Figure~\ref*{#1}}}}
+\renewcommand{\tabref}[1]{\hyperref[#1]{\mbox{Table~\ref*{#1}}}}
+
+\title{Active Learning of Function Contours using Gaussian Process Confidence Bounds\thanks{Final
+report for the course \emph{Research in Computer Science} (Spring
+Semester 2012), carried out under the supervision of \emph{Prof. Andreas Krause.}}}
+
+\author{
+Alkis Gkotovos\\
+Department of Computer Science, ETH Zurich\\
+\texttt{alkisg@student.ethz.ch}
+}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present a novel algorithm for actively identifying function
+contours using the framework of Gaussian Processes and utilizing the
+inferred confidence bounds to guide the learning process. We also show how
+the algorithm can be extended to identify $\epsilon$-optimal function contours.
+Our method is evaluated and compared to the state of the art on synthetic and
+real-world seismographic data.
+\end{abstract}
+
+\section{Introduction}
+
+
+\section{Model description}
+
+\bibliographystyle{plain}
+\bibliography{report}
+
+\end{document}
