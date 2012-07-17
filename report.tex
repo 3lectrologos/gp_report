@@ -32,6 +32,9 @@
 \renewcommand{\figref}[1]{\hyperref[#1]{\mbox{Figure~\ref*{#1}}}}
 \renewcommand{\tabref}[1]{\hyperref[#1]{\mbox{Table~\ref*{#1}}}}
 
+\newcommand{\argmax}{\operatornamewithlimits{argmax}}
+\newcommand{\argmin}{\operatornamewithlimits{argmin}}
+
 \title{Active Learning of Function Contours using Gaussian Process Confidence Bounds\thanks{Final
 report for the course \emph{Research in Computer Science} (Spring
 Semester 2012), carried out under the supervision of \emph{Prof. Andreas Krause.}}}
@@ -65,8 +68,8 @@ The problem of actively learning function contours can be described as follows.
 Let ${f : \mathcal{D} \to \mathbb{R}}$ be the target function, where
 $\mathcal{D}$ is a bounded subset of $\mathbb{R}^n$. We are interested in
 finding the subset of $\mathcal{D}$ where this function takes values greater
-than a specified threshold $h$, i.e. the set
-$\mathcal{G} = \{x \in \mathcal{D} \mid f(x) > h\}$. To this end, we take
+than a specified threshold $t$, i.e. the set
+$\mathcal{G} = \{x \in \mathcal{D} \mid f(x) > t\}$. To this end, we take
 consecutive measurements $(x_i, f(x_i))$ of the function
 and use them to determine $\mathcal{G}$. After the $i$-th step, the set of
 all acquired measurements is
@@ -82,7 +85,7 @@ compared to random sampling.
 
 In this setting, we have to decide on (1) a model that allows us to use the
 measurements in order to obtain an approximation of $\mathcal{G}$, and (2) a
-strategy to each time select the next point of measurement. The following
+strategy to select the next point of measurement at each step. The following
 subsections deal with these two issues.
 
 \subsection{Gaussian processes}
@@ -96,17 +99,53 @@ ${K : \mathcal{D} \times \mathcal{D} \to \mathbb{R}}$, which determines the
 covariance of any two points in $\mathcal{D}$.
 
 In our active learning setting, $\mathcal{M}_i$ is used as a training set
-for Gaussian process regression and the inferred values $g_i(x)$ of the
-model are used to approximate the set $\mathcal{G}$ as
-${\mathcal{G}_i = \{x \in \mathcal{D} \mid g_i(x) > h\}}$.
+for Gaussian process regression and the inferred mean $m_i(x)$ of the
+model is used to approximate the set $\mathcal{G}$ as
+${\mathcal{G}_i = \{x \in \mathcal{D} \mid m_i(x) > h\}}$.
 
 \subsection{Choosing the next point}
+The general strategy for choosing the next point of measurement at each step $i$
+is to first establish a finite set $\mathcal{C}_i \subseteq \mathcal{D}$ of
+candidate points, then evaluate some heuristic
+${h : \mathcal{C}_i \to \mathbb{R}}$ for each candidate point and, finally,
+choose the point with the largest heuristic value, that is
+\begin{align*}
+  x_{i+1} = \underset{x \in \mathcal{C}_i}{\argmax}\{h(x)\}
+\end{align*}
+If $\mathcal{D}$ is finite we can use
+$\mathcal{C}_i = \mathcal{D}\setminus\mathcal{M}_i$ or a random subset thereof
+in case $\mathcal{C}_i$ is too large. Otherwise, we have to sample a set of
+candidate points from $\mathcal{D}$. Random sampling is preferred over a fixed
+grid to get better coverage of $\mathcal{D}$~\cite{bryan2005}.
+
+Choosing the heuristic $h$ involves an exploration-exploitation trade-off. The
+state of the art in contour detection combines the inferred variance of the
+Gaussian process with the
+distance from the inferred contour to create the straddle~\cite{bryan2005}
+heuristic ${h_{straddle}(x) = 1.96\sigma(x) - | m(x) - t |}$, where $m(x)$
+and $\sigma(x)$ are respectively the inferred mean and variance of the Gaussian
+process at the candidate point $x$.
+
+Our proposed heuristic is based on the fact that we can construct confidence
+bounds for the desired contour by using the inferred mean and variance of
+the Gaussian process. In particular, for every $x \in \mathcal{D}$ we obtain
+a confidence interval ${[m(x) - \kappa\sigma(x), m(x) + \kappa\sigma(x)]}$,
+where the probability of $x$ being in the interval depends on the value
+of $\kappa$. Extending this idea, we can define a confidence region for
+the desired contour at level $t$ by using two sets
+$\mathcal{S}_1 = {x \in \mathcal{D} \mid }$
+
+In other words, we can exlude candidate points in the region where
+$f(x) < t$ with high probability (the set $\mathcal{D}\setminus\mathcal{S}_1$)
+and in the region where $f(x) > t$ with high probability
+(the set $\mathcal{D}\setminus\mathcal{S}_2$).
 
 \subsection{Identifying $\epsilon$-optimal contours}
 
 \section{Experiments}
 
 \todo{Talk about Hausdorff here?}
+
 \todo{Properly choosing kernel}
 
 \subsection{Synthetic data}
