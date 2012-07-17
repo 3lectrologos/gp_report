@@ -34,6 +34,15 @@
 
 \newcommand{\argmax}{\operatornamewithlimits{argmax}}
 \newcommand{\argmin}{\operatornamewithlimits{argmin}}
+\newcommand{\twopartdef}[4]
+{
+	\left\{
+		\begin{array}{ll}
+			#1 & \mbox{if } #2 \\
+			#3 & \mbox{if } #4
+		\end{array}
+	\right.
+}
 
 \title{Active Learning of Function Contours using Gaussian Process Confidence Bounds\thanks{Final
 report for the course \emph{Research in Computer Science} (Spring
@@ -52,12 +61,13 @@ Department of Computer Science, ETH Zurich\\
 \maketitle
 
 \begin{abstract}
-We present a novel algorithm for actively identifying function
-contours using the framework of Gaussian processes and utilizing the
+We present a novel heuristic for actively identifying function
+contours using the framework of Gaussian processes to model the underlying
+function and utilizing the
 inferred confidence bounds to guide the learning process. We also show how
-the algorithm can be extended to identify $\epsilon$-optimal function contours.
-Our method is evaluated and compared to the state of the art on synthetic and
-real-world seismographic data.
+he proposed heuristic can be extended to identify $\epsilon$-optimal function
+contours. Our method is evaluated and compared to the state of the art on
+synthetic and real-world seismographic data.
 \end{abstract}
 
 \section{Introduction}
@@ -69,22 +79,22 @@ Let ${f : \mathcal{D} \to \mathbb{R}}$ be the target function, where
 $\mathcal{D}$ is a bounded subset of $\mathbb{R}^n$. We are interested in
 finding the subset of $\mathcal{D}$ where this function takes values greater
 than a specified threshold $t$, i.e. the set
-$\mathcal{G} = \{x \in \mathcal{D} \mid f(x) > t\}$. To this end, we take
-consecutive measurements $(x_i, f(x_i))$ of the function
-and use them to determine $\mathcal{G}$. After the $i$-th step, the set of
+$\mathcal{G}_t = \{x \in \mathcal{D} \mid f(x) > t\}$. To this end, we take
+consecutive measurements $(x^{(i)}, f(x^{(i)}))$ of the function
+and use them to determine $\mathcal{G}_t$. After the $i$-th step, the set of
 all acquired measurements is
-$\mathcal{M}_i = \{(x_1, f(x_1)),\ldots,(x_i, f(x_i))\}$.
+$\mathcal{M}^{(i)} = \{(x^{(1)}, f(x^{(1)})),\ldots,(x^{(i)}, f(x^{(i)}))\}$.
 
 Our basic premise is that the time required to obtain each measurement is
 non-negligible and, therefore, taking a large number of random measurements
 over the whole domain $\mathcal{D}$ is prohibitive. We rather aim at directing
-the measurement process so that the chosen points $x_i$ are informative with
+the measurement process so that the chosen points $x^{(i)}$ are informative with
 respect to the desired contours, which should result in accurately determining
-the set $\mathcal{G}$ using a significantly smaller number of measurements
+the set $\mathcal{G}_t$ using a significantly smaller number of measurements
 compared to random sampling.
 
 In this setting, we have to decide on (1) a model that allows us to use the
-measurements in order to obtain an approximation of $\mathcal{G}$, and (2) a
+measurements in order to obtain an approximation of $\mathcal{G}_t$, and (2) a
 strategy to select the next point of measurement at each step. The following
 subsections deal with these two issues.
 
@@ -98,25 +108,25 @@ the assumed underlying model are primarily specified by a kernel function
 ${K : \mathcal{D} \times \mathcal{D} \to \mathbb{R}}$, which determines the
 covariance of any two points in $\mathcal{D}$.
 
-In our active learning setting, $\mathcal{M}_i$ is used as a training set
-for Gaussian process regression and the inferred mean $m_i(x)$ of the
-model is used to approximate the set $\mathcal{G}$ as
-${\mathcal{G}_i = \{x \in \mathcal{D} \mid m_i(x) > h\}}$.
+In our active learning setting, $\mathcal{M}^{(i)}$ is used as a training set
+for Gaussian process regression and the inferred mean $m^{(i)}(x)$ of the
+model is used to approximate the set $\mathcal{G}_t$ as
+${\mathcal{G}^{(i)}_t = \{x \in \mathcal{D} \mid m^{(i)}(x) > h\}}$.
 
 \subsection{Choosing the next point}
 The general strategy for choosing the next point of measurement at each step $i$
-is to first establish a finite set $\mathcal{C}_i \subseteq \mathcal{D}$ of
+is to first establish a finite set $\mathcal{C}^{(i)} \subseteq \mathcal{D}$ of
 candidate points, then evaluate some heuristic
-${h : \mathcal{C}_i \to \mathbb{R}}$ for each candidate point and, finally,
+${h : \mathcal{C}^{(i)} \to \mathbb{R}}$ for each candidate point and, finally,
 choose the point with the largest heuristic value, that is
 \begin{align*}
-  x_{i+1} = \underset{x \in \mathcal{C}_i}{\argmax}\{h(x)\}
+  x^{(i+1)} = \underset{x \in \mathcal{C}^{(i)}}{\argmax}\{h(x)\}
 \end{align*}
-If $\mathcal{D}$ is finite we can use
-$\mathcal{C}_i = \mathcal{D}\setminus\mathcal{M}_i$ or a random subset thereof
-in case $\mathcal{C}_i$ is too large. Otherwise, we have to sample a set of
-candidate points from $\mathcal{D}$. Random sampling is preferred over a fixed
-grid to get better coverage of $\mathcal{D}$~\cite{bryan2005}.
+If $\mathcal{D}$ is finite, we can use
+$\mathcal{C}^{(i)} = \mathcal{D}\setminus\mathcal{M}_i$ or a random subset
+thereof in case $\mathcal{C}_i$ is too large. Otherwise, we have to sample a set
+of candidate points from $\mathcal{D}$. Random sampling is preferred over a
+fixed grid to get better coverage of $\mathcal{D}$~\cite{bryan2005}.
 
 Choosing the heuristic $h$ involves an exploration-exploitation trade-off. The
 state of the art in contour detection combines the inferred variance of the
@@ -131,16 +141,47 @@ bounds for the desired contour by using the inferred mean and variance of
 the Gaussian process. In particular, for every $x \in \mathcal{D}$ we obtain
 a confidence interval ${[m(x) - \kappa\sigma(x), m(x) + \kappa\sigma(x)]}$,
 where the probability of $x$ being in the interval depends on the value
-of $\kappa$. Extending this idea, we can define a confidence region for
+of $\kappa$. Extending this idea and defining the functions
+$u_{\kappa}(x) = m(x) + \kappa\sigma(x)$ and
+$\ell_{\kappa}(x) = m(x) - \kappa\sigma(x)$,
+we can create a confidence region for
 the desired contour at level $t$ by using two sets
-$\mathcal{S}_1 = {x \in \mathcal{D} \mid }$
-
-In other words, we can exlude candidate points in the region where
+\begin{align*}
+  \mathcal{S}_1 &= \{x \in \mathcal{D} \mid u_{\kappa}(x) \geq t\}\\
+  \text{and}\hspace{1em}
+  \mathcal{S}_2 &= \{x \in \mathcal{D} \mid \ell_{\kappa}(x) \leq t\}
+\end{align*}
+The confidence region is then
+$\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$ and our heuristic is defined
+so that the point with the largest variance among the candidate points that
+lie inside the confidence region is chosen:
+\begin{align*}
+  h_{cb}(x) = \twopartdef { \sigma(x) } {x \in \mathcal{S}} {-\infty} {x \notin \mathcal{S}}
+\end{align*}
+In other words, we exlude candidate points in the region where
 $f(x) < t$ with high probability (the set $\mathcal{D}\setminus\mathcal{S}_1$)
 and in the region where $f(x) > t$ with high probability
 (the set $\mathcal{D}\setminus\mathcal{S}_2$).
 
+From the above definitions it follows that 
+$\mathcal{D}\setminus\mathcal{S}_2\subseteq\mathcal{S}_1$
+and, equivalently, $\mathcal{S}\neq\varnothing$. We can also see that
+obtaining more measurements leads to lower variance values, which in turn
+generally reduces the size of $\mathcal{S}$.
+
 \subsection{Identifying $\epsilon$-optimal contours}
+The confidence bound heuristic described in the previous subsection can be
+readily extended to detect $\epsilon$-optimal function contours,
+i.e. to approximate the set
+${\mathcal{G}_{\epsilon} = \{x \in \mathcal{D} \mid f(x) > \underset{x \in \mathcal{D}}{\max} f(x) - \epsilon\}}$.
+In this case, the sets used to define the confidence region $\mathcal{S}$
+are defined as
+\begin{align*}
+  \mathcal{S}_1 &= \{x \in \mathcal{D} \mid u_{\kappa}(x) \geq \underset{x \in \mathcal{D}}{\min}\ell_{\kappa}(x) - \epsilon\}\\
+  \text{and}\hspace{1em}
+  \mathcal{S}_2 &= \{x \in \mathcal{D} \mid m(x) + \kappa\sigma(x) \geq t\}
+\end{align*}
+
 
 \section{Experiments}
 
