@@ -25,12 +25,11 @@
 
 \newcommand{\todo}[1]{\noindent\texttt{\color[rgb]{0.5,0.1,0.1} TODO: #1}}
 
-\newcommand{\sectref}[1]{\mbox{Section~\ref{#1}}}
-\newcommand{\figref}[1]{\mbox{Figure~\ref{#1}}}
-\newcommand{\tabref}[1]{\mbox{Table~\ref{#1}}}
-\renewcommand{\sectref}[1]{\hyperref[#1]{\mbox{Section~\ref*{#1}}}}
-\renewcommand{\figref}[1]{\hyperref[#1]{\mbox{Figure~\ref*{#1}}}}
-\renewcommand{\tabref}[1]{\hyperref[#1]{\mbox{Table~\ref*{#1}}}}
+
+\newcommand{\sectref}[1]{\hyperref[#1]{\mbox{Section~\ref*{#1}}}}
+\newcommand{\figref}[1]{\hyperref[#1]{\mbox{Figure~\ref*{#1}}}}
+\newcommand{\tabref}[1]{\hyperref[#1]{\mbox{Table~\ref*{#1}}}}
+\newcommand{\eqtref}[1]{\hyperref[#1]{\mbox{Equation~\ref*{#1}}}}
 
 \newcommand{\argmax}{\operatornamewithlimits{argmax}}
 \newcommand{\argmin}{\operatornamewithlimits{argmin}}
@@ -155,9 +154,9 @@ The confidence region is then
 $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$ and our heuristic is defined
 so that the point with the largest variance among the candidate points that
 lie inside the confidence region is chosen:
-\begin{align*}
+\begin{align}\label{eq:hcb}
   h_{cb}(x) = \twopartdef { \sigma(x) } {x \in \mathcal{S}} {-\infty} {x \notin \mathcal{S}}
-\end{align*}
+\end{align}
 In other words, we exlude candidate points in the region where
 $f(x) < t$ with high probability (the set $\mathcal{D}\setminus\mathcal{S}_1$)
 and in the region where $f(x) > t$ with high probability
@@ -173,15 +172,16 @@ generally reduces the size of $\mathcal{S}$.
 The confidence bound heuristic described in the previous subsection can be
 readily extended to detect $\epsilon$-optimal function contours,
 i.e. to approximate the set
-${\mathcal{G}_{\epsilon} = \{x \in \mathcal{D} \mid f(x) > \underset{x \in \mathcal{D}}{\max} f(x) - \epsilon\}}$.
+${\mathcal{G}_{\epsilon} = \{x \in \mathcal{D} \mid f(x) > \underset{x \in \mathcal{D}}{\max}\,f(x) - \epsilon\}}$.
 In this case, the sets used to define the confidence region $\mathcal{S}$
 are defined as
 \begin{align*}
-  \mathcal{S}_1 &= \{x \in \mathcal{D} \mid u_{\kappa}(x) \geq \underset{x \in \mathcal{D}}{\min}\ell_{\kappa}(x) - \epsilon\}\\
+  \mathcal{S}_1 &= \{x \in \mathcal{D} \mid u_{\kappa}(x) \geq \underset{x \in \mathcal{D}}{\max}\,\ell_{\kappa}(x) - \epsilon\}\\
   \text{and}\hspace{1em}
-  \mathcal{S}_2 &= \{x \in \mathcal{D} \mid m(x) + \kappa\sigma(x) \geq t\}
+  \mathcal{S}_2 &= \{x \in \mathcal{D} \mid \ell_{\kappa}(x) \leq \underset{x \in \mathcal{D}}{\max}\,u_{\kappa}(x) - \epsilon\}
 \end{align*}
-
+The confidence region is $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$,
+as before, while the heuristic is the same as in~\eqtref{eq:hcb}.
 
 \section{Experiments}
 
