@@ -135,6 +135,16 @@ heuristic ${h_{straddle}(x) = 1.96\sigma(x) - | m(x) - t |}$, where $m(x)$
 and $\sigma(x)$ are respectively the inferred mean and variance of the Gaussian
 process at the candidate point $x$.
 
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{figures/cb}
+  \caption{A one-dimensional example showing the two sets $\mathcal{S}_1$ and
+           $\mathcal{S}_2$ and the
+           the (shaded) confidence region
+           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$.}
+  \label{fig:cb}
+\end{figure}
+
 Our proposed heuristic is based on the fact that we can construct confidence
 bounds for the desired contour by using the inferred mean and variance of
 the Gaussian process. In particular, for every $x \in \mathcal{D}$ we obtain
@@ -151,7 +161,8 @@ the desired contour at level $t$ by using two sets
   \mathcal{S}_2 &= \{x \in \mathcal{D} \mid \ell_{\kappa}(x) \leq t\}
 \end{align*}
 The confidence region is then
-$\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$ and our heuristic is defined
+$\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$ (see~\figref{fig:cb}) and our
+heuristic is defined
 so that the point with the largest variance among the candidate points that
 lie inside the confidence region is chosen:
 \begin{align}\label{eq:hcb}
@@ -170,8 +181,8 @@ generally reduces the size of $\mathcal{S}$.
 
 \subsection{Identifying $\epsilon$-optimal contours}
 The confidence bound heuristic described in the previous subsection can be
-readily extended to detect $\epsilon$-optimal function contours,
-i.e. to approximate the set
+readily extended for detecting $\epsilon$-optimal function contours,
+i.e. for approximating the set
 ${\mathcal{G}_{\epsilon} = \{x \in \mathcal{D} \mid f(x) > \underset{x \in \mathcal{D}}{\max}\,f(x) - \epsilon\}}$.
 In this case, the sets used to define the confidence region $\mathcal{S}$
 are defined as
@@ -180,8 +191,33 @@ are defined as
   \text{and}\hspace{1em}
   \mathcal{S}_2 &= \{x \in \mathcal{D} \mid \ell_{\kappa}(x) \leq \underset{x \in \mathcal{D}}{\max}\,u_{\kappa}(x) - \epsilon\}
 \end{align*}
-The confidence region is $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$,
-as before, while the heuristic is the same as in~\eqtref{eq:hcb}.
+Using the same confidence region $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$
+as before, runs the risk of exluding areas where the true maximum might lie.
+Since the approximation
+${\mathcal{G}^{(i)}_\epsilon = \{x \in \mathcal{D} \mid m^{(i)}(x) > \underset{x \in \mathcal{D}}{\max}\,m^{(i)}(x) - \epsilon\}}$
+of $\mathcal{G}_{\epsilon}$ at each step
+depends on the inferred maximum, it is important to have an accurate estimate
+of the true maximum in order to get an accurate approximation of the desired
+$\epsilon$-optimal contour. For that reason, we include in $\mathcal{S}$ the
+region where the true maximum could still lie with high probability, i.e.
+the set
+\begin{align*}
+  \mathcal{S}_3 &= \{x \in \mathcal{D} \mid u_{\kappa}(x) \geq \underset{x \in \mathcal{D}}{\max}\,\ell_{\kappa}(x)\}
+\end{align*}
+Therefore, the resulting confidence region is
+$\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2\cup\mathcal{S}_3$, as shown
+in~\figref{fig:cbe}, and the heuristic function is the same as
+in~\eqtref{eq:hcb}.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{figures/cb_eps}
+  \caption{A one-dimensional example showing the three sets $\mathcal{S}_1$,
+           $\mathcal{S}_2$ and $\mathcal{S}_3$, as well as
+           the (shaded) confidence region
+           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2\cup\mathcal{S}_3$.}
+  \label{fig:cbe}
+\end{figure}
 
 \section{Experiments}
 
