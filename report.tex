@@ -64,7 +64,7 @@ We present a novel heuristic for actively identifying function
 contours using the framework of Gaussian processes to model the underlying
 function and utilizing the
 inferred confidence bounds to guide the learning process. We also show how
-he proposed heuristic can be extended to identify $\epsilon$-optimal function
+the proposed heuristic can be extended to identify $\epsilon$-optimal function
 contours. Our method is evaluated and compared to the state of the art on
 synthetic and real-world seismographic data.
 \end{abstract}
@@ -219,10 +219,66 @@ in~\eqtref{eq:hcb}.
 \end{figure}
 
 \section{Experiments}
+We developed a contour detection framework prototype in Matlab, which uses the
+GPML toolbox\footnote{\url{http://www.gaussianprocess.org/gpml/}} for
+Gaussian process inference. In short, our framework allows for providing
+targets as functions or discrete data sets,
+implements the previously described heuristics for contour detection, and
+provides contour evaluation and visualization capabilities.
 
-\todo{Talk about Hausdorff here?}
+In the following we evaluate our proposed heuristics on two experiments.
+The first is carried out on a synthetic two-dimensional sinusoidal target
+function proposed by Bryan et al.~\cite{bryan2005} for evaluating the straddle
+heuristic. The function is defined as
+\begin{align*}
+  f(x, y) = \sin(10x) + \cos(4y) - \cos(3xy)
+\end{align*}
+with domain
+$\mathcal{D} = \{(x, y) \in \mathbb{R} \mid 0 \leq x \leq 1,\;0 \leq y \leq 2\}$.
+For the second experiment we use a two-dimensional seismographic dataset
+collected by about 4000 sensors in California.
+We first discuss two important issues that came up during evaluation.
 
-\todo{Properly choosing kernel}
+\noindent\emph{Choosing a kernel.}\;The choice of the Gaussian process
+kernel function and its hyperparameters can have a considerable impact on the
+performance of contour detection. In both experiments we use a
+Matern-5~\cite{gpbook} kernel function. In addition, we initialize the algorithm
+with 20 random measurements and optimize the hyperparameters with respect to
+those measurements. Moreover, we re-optimize the hyperparameters at
+exponentially increasing measurement-set sizes
+(at $20\times 2^n$ samples, $n = 0, 1,\ldots$). This is done to avoid cases
+where the initially estimated hyperparameters are not accurate due to bad luck.
+On the other hand, re-optimizing the hyperparameters too often is not only
+computationally inefficient, but can also lead to worse results.
+
+\noindent\emph{Choosing a metric.}\;
+
+\begin{figure}[tb]
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_20}
+    \caption{20 measurements}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_40}
+    \caption{40 measurements}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_80}
+    \caption{80 measurements}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_160}
+    \caption{160 measurements}
+  \end{subfigure}
+  \caption{Inferred contour (orange), true contour (dark grey) and confidence
+           region $\mathcal{S}$ (light grey) for one execution of the
+           contour detection algorithm using our proposed heuristic.}
+  \label{fig:sin2d_steps}
+\end{figure}
 
 \subsection{Synthetic data}
 
