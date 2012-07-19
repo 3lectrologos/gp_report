@@ -239,19 +239,56 @@ For the second experiment we use a two-dimensional seismographic dataset
 collected by about 4000 sensors in California.
 We first discuss two important issues that came up during evaluation.
 
-\noindent\emph{Choosing a kernel.}\;The choice of the Gaussian process
+\noindent\emph{Kernel and hyperparameters.}\;The choice of the Gaussian process
 kernel function and its hyperparameters can have a considerable impact on the
 performance of contour detection. In both experiments we use a
-Matern-5~\cite{gpbook} kernel function. In addition, we initialize the algorithm
-with 20 random measurements and optimize the hyperparameters with respect to
-those measurements. Moreover, we re-optimize the hyperparameters at
+Matern-5~\cite{gpbook} kernel function. For the first experiment, we initialize
+the algorithm with 20 random measurements and optimize the hyperparameters with
+respect to these measurements. Moreover, we re-optimize the hyperparameters at
 exponentially increasing measurement-set sizes
 (at $20\times 2^n$ samples, $n = 0, 1,\ldots$). This is done to avoid cases
 where the initially estimated hyperparameters are not accurate due to bad luck.
 On the other hand, re-optimizing the hyperparameters too often is not only
 computationally inefficient, but can also lead to worse results.
+For the second experiment, we also have a different seismographic dataset
+to our disposal, thus we compute fitting hyperparameters for this other dataset
+and use them for our experiment (without re-optimizing).
 
-\noindent\emph{Choosing a metric.}\;
+\noindent\emph{Evaluation metric.}\;We will use three different ``metrics'' to
+measure the quality of the inferred contours. The first is classification
+accuracy of points being above or below the contour threshold. The second is
+by approximating the area of the set $\mathcal{D}\setminus\mathcal{S}$, which is
+done by again computing the classification accuracy, but only considering points
+outside the confidence region $\mathcal{S}$ as correctly classified.
+We will call this metric \emph{strict accuracy} and, intuitively, it measures
+the certainty about the inferred contours according to the Gaussian process
+model. The third metric is a modified version of the Hausdorff distance, which
+is normally defined as
+$D_{hd}(\mathcal{X}, \mathcal{Y}) =
+\max\{\underset{x\in\mathcal{X}}{\max}\;\underset{y\in\mathcal{Y}}{\min}\;d(x, y),
+      \underset{x\in\mathcal{X}}{\max}\;\underset{y\in\mathcal{Y}}{\min}\;d(x, y)\}$,
+where $d(x, y)$ is the Euclidean distance between $x$ and $y$.
+In our case, $\mathcal{X}$ and $\mathcal{Y}$ consist of a number of points on
+the true and inferred contours respectively (as computed by Matlab's
+\texttt{contourc}). Furthermore, to mitigate the effect of the inner maxima,
+we replace them by $L^{20}$-norms of the corresponding sets converted to
+vectors. Finally, we normalize the distance to lie in $[0, 1]$ and subtract it
+from 1 in order to get a similarity metric. We call the result
+\emph{normalized Hausdorff similarity} metric or NHDS.
+
+\subsection{Experiment 1}
+\figref{fig:sin2d_steps} shows the evolution of the inferred contour and the
+confidence region for a single execution of the algorithm using the confidence
+bound heuristic. Note how the measurements gather around the true contour
+as the confidence region shrinks. In \figref{fig:sin2d_eval} the performance
+of our heuristic is compared to the straddle heuristic using the three metrics
+presented before. The algorithm was run 20 times for each heuristic and the
+errorbars have a height of two standard errors. We also depict the performance
+of random sampling as a baseline. The performance of the two heuristics seems
+to be comparable, while both are
+clearly superior to random sampling. It is also evident that the NHDS metric
+distinguishes in this case more clearly than the other metrics between
+random sampling and the two heuristics.
 
 \begin{figure}[tb]
   \begin{subfigure}[b]{0.5\textwidth}
@@ -259,6 +296,7 @@ computationally inefficient, but can also lead to worse results.
     \includegraphics[width=\textwidth]{figures/sin2d_20}
     \caption{20 measurements}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{0.5\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/sin2d_40}
@@ -269,6 +307,7 @@ computationally inefficient, but can also lead to worse results.
     \includegraphics[width=\textwidth]{figures/sin2d_80}
     \caption{80 measurements}
   \end{subfigure}
+  \hfill
   \begin{subfigure}[b]{0.5\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/sin2d_160}
@@ -276,11 +315,34 @@ computationally inefficient, but can also lead to worse results.
   \end{subfigure}
   \caption{Inferred contour (orange), true contour (dark grey) and confidence
            region $\mathcal{S}$ (light grey) for one execution of the
-           contour detection algorithm using our proposed heuristic.}
+           contour detection algorithm on the synthetic sinusoidal target
+           function using our proposed confidence bound heuristic.}
   \label{fig:sin2d_steps}
 \end{figure}
 
-\subsection{Synthetic data}
+\begin{figure}[tb]
+  \begin{subfigure}[b]{0.329\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_acc}
+    \caption{Accuracy}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.329\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_strict_acc}
+    \caption{Strict accuracy}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.329\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/sin2d_hd}
+    \caption{NHDS}
+  \end{subfigure}
+  \caption{Random, straddle and conf. bound heuristics evaluated on the three
+           metrics for an increasing number of measurements
+           (Experiment 1, 20 iterations).}
+  \label{fig:sin2d_eval}
+\end{figure}
 
 \subsection{Seismographic data}
 
