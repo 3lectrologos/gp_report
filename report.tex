@@ -92,53 +92,54 @@ Let ${f : \mathcal{D} \to \mathbb{R}}$ be the target function, where
 $\mathcal{D}$ is a bounded subset of $\mathbb{R}^n$. We are interested in
 finding the subset of $\mathcal{D}$ where this function takes values greater
 than a specified threshold $t$, i.e. the set
-$\mathcal{G}_t = \{x \in \mathcal{D} \mid f(x) > t\}$. To this end, we take
+$\mathcal{G}_t = \{x \in \mathcal{D} \mid f(x) > t\}$. To this end, we make
 consecutive measurements $(x^{(i)}, f(x^{(i)}))$ of the function
-and use them to determine $\mathcal{G}_t$. After the $i$-th step, the set of
-all acquired measurements is
-$\mathcal{M}^{(i)} = \{(x^{(1)}, f(x^{(1)})),\ldots,(x^{(i)}, f(x^{(i)}))\}$.
+and use them to determine $\mathcal{G}_t$. After the $i$-th step, the sets of
+measurement positions and values are
+$\mathcal{X}^{(i)} = \{x^{(1)},\ldots,x^{(i)}\}$ and
+$\mathcal{Y}^{(i)} = \{f(x^{(1)}),\ldots,f(x^{(i)})\}$ respectively.
 
 As mentioned before, our basic premise is that the effort required to obtain
 each measurement is
-non-negligible and, therefore, taking a large number of random measurements
-over the whole domain $\mathcal{D}$ is prohibitive. We rather aim at directing
-the measurement process so that the chosen points $x^{(i)}$ are informative with
+non-negligible and, therefore, making a large number of random measurements
+over the whole domain $\mathcal{D}$ is prohibitive. We rather aim at improving
+the sampling process so that the chosen points $x^{(i)}$ are informative with
 respect to the desired contours, which should result in accurately determining
 the set $\mathcal{G}_t$ using a significantly smaller number of measurements
 compared to random sampling.
 
 In this setting, we have to decide on (1) a model that allows us to use the
 measurements in order to obtain an approximation of $\mathcal{G}_t$, and (2) a
-strategy to select the next point of measurement at each step. The following
+strategy to select the next point of sampling at each step. The following
 subsections deal with these two issues.
 
 \subsection{Gaussian processes}
-We chose to use Gaussian processes~\cite{gpbook} in modeling the target
+We use Gaussian processes~\cite{gpbook} for modeling the target
 function $f$, as they have been successfully used before in the context of
 contour detection~\cite{bryan2005, bryan2008}. Gaussian process regression
 offers a non-parametric framework for predicting the values of the function at
-unobserved points, given a number of measurements. The characteristics of
+unobserved points given a number of measurements. The characteristics of
 the assumed underlying model are primarily specified by a kernel function
-${K : \mathcal{D} \times \mathcal{D} \to \mathbb{R}}$, which determines the
-covariance of any two points in $\mathcal{D}$.
+${K : \mathcal{D} \times \mathcal{D} \to \mathbb{R}}$ and its hyperparameters.
 
-In our active learning setting, $\mathcal{M}^{(i)}$ is used as a training set
+At each step of active learning, $\mathcal{X}^{(i)}$ and $\mathcal{Y}^{(i)}$ are
+used as training sets
 for Gaussian process regression and the inferred mean $m^{(i)}(x)$ of the
 model is used to approximate the set $\mathcal{G}_t$ as
-${\mathcal{G}^{(i)}_t = \{x \in \mathcal{D} \mid m^{(i)}(x) > h\}}$.
+${\mathcal{G}^{(i)}_t = \{x \in \mathcal{D} \mid m^{(i)}(x) > t\}}$.
 
 \subsection{Choosing the next point}
 The general strategy for choosing the next point of measurement at each step $i$
 is to first establish a finite set $\mathcal{C}^{(i)} \subseteq \mathcal{D}$ of
 candidate points, then evaluate some heuristic
 ${h : \mathcal{C}^{(i)} \to \mathbb{R}}$ for each candidate point and, finally,
-choose the point with the largest heuristic value, that is
+choose the point with the largest score, that is
 \begin{align*}
   x^{(i+1)} = \underset{x \in \mathcal{C}^{(i)}}{\argmax}\{h(x)\}
 \end{align*}
 If $\mathcal{D}$ is finite, we can use
-$\mathcal{C}^{(i)} = \mathcal{D}\setminus\mathcal{M}_i$ or a random subset
-thereof in case $\mathcal{C}_i$ is too large. Otherwise, we have to sample a set
+$\mathcal{C}^{(i)} = \mathcal{D}\setminus\mathcal{X}^{(i)}$ or a random subset
+thereof in case $\mathcal{C}^{(i)}$ is too large. Otherwise, we have to sample a set
 of candidate points from $\mathcal{D}$. Random sampling is preferred over a
 fixed grid to get better coverage of $\mathcal{D}$~\cite{bryan2005}.
 
@@ -150,21 +151,11 @@ heuristic ${h_{straddle}(x) = 1.96\sigma(x) - | m(x) - t |}$, where $m(x)$
 and $\sigma(x)$ are respectively the inferred mean and variance of the Gaussian
 process at the candidate point $x$.
 
-\begin{figure}[tb]
-  \centering
-  \includegraphics[width=\textwidth]{figures/cb}
-  \caption{A one-dimensional example showing the two sets $\mathcal{S}_1$ and
-           $\mathcal{S}_2$, as well as the (shaded) confidence region
-           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$.}
-  \label{fig:cb}
-  \vspace{-0.5em}
-\end{figure}
-
 Our proposed heuristic is based on the fact that we can construct confidence
 bounds for the desired contour by using the inferred mean and variance of
 the Gaussian process. In particular, for every $x \in \mathcal{D}$ we obtain
 a confidence interval ${[m(x) - \kappa\sigma(x), m(x) + \kappa\sigma(x)]}$,
-where the probability of $x$ being in the interval depends on the value
+where the probability of $f(x)$ lying in the interval depends on the value
 of $\kappa$. Extending this idea and defining the functions
 $u_{\kappa}(x) = m(x) + \kappa\sigma(x)$ and
 $\ell_{\kappa}(x) = m(x) - \kappa\sigma(x)$,
@@ -188,16 +179,26 @@ $f(x) < t$ with high probability (the set $\mathcal{D}\setminus\mathcal{S}_1$)
 and in the region where $f(x) > t$ with high probability
 (the set $\mathcal{D}\setminus\mathcal{S}_2$).
 
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{figures/cb}
+  \caption{A one-dimensional example showing the two sets $\mathcal{S}_1$ and
+           $\mathcal{S}_2$, as well as the (shaded) confidence region
+           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$.}
+  \label{fig:cb}
+  \vspace{-0.5em}
+\end{figure}
+
 From the above definitions it follows that 
 $\mathcal{D}\setminus\mathcal{S}_2\subseteq\mathcal{S}_1$
-and, equivalently, $\mathcal{S}\neq\varnothing$. We can also see that
-obtaining more measurements leads to lower variance values, which in turn
-generally reduces the size of $\mathcal{S}$.
+and, equivalently, $\mathcal{S}\neq\varnothing$. We also expect that
+obtaining more measurements will lead to lower variance values, which in turn
+will generally reduce the size of $\mathcal{S}$.
 
 \subsection{Detecting $\epsilon$-optimal contours}
 The confidence bound heuristic described in the previous subsection can be
-readily extended for detecting $\epsilon$-optimal function contours,
-i.e. for approximating the set
+readily extended to detecting $\epsilon$-optimal function contours,
+i.e. approximating the set
 ${\mathcal{G}_{\epsilon} = \{x \in \mathcal{D} \mid f(x) > \underset{x \in \mathcal{D}}{\max}\,f(x) - \epsilon\}}$.
 In this case, the sets used to define the confidence region $\mathcal{S}$
 are defined as
@@ -243,7 +244,7 @@ targets as functions or discrete data sets,
 implements the previously described heuristics for contour detection, and
 provides contour evaluation and visualization capabilities.
 
-In the following we evaluate our proposed heuristics on two experiments.
+In the following, we evaluate our proposed heuristic on two experiments.
 The first is carried out on a synthetic two-dimensional sinusoidal target
 function proposed by Bryan et al.~\cite{bryan2005} for evaluating the straddle
 heuristic. The function is defined as
@@ -253,11 +254,9 @@ heuristic. The function is defined as
 with domain
 $\mathcal{D} = \{(x, y) \in \mathbb{R} \mid 0 \leq x \leq 1,\;0 \leq y \leq 2\}$.
 For the second experiment we use a two-dimensional seismographic dataset
-collected by about 4089 sensors in California. For the first experiment
-we use 1000 uniformly random candidates at each step, while for the second
-one every unused sample point is a candidate at each step. For both
-experiments $k = 2$.
-We first discuss two important issues that came up during evaluation.
+collected by 4089 sensors in California.
+Before presenting the results, we first discuss two important issues that came up
+during evaluation.
 
 \noindent\emph{Kernel and hyperparameters.}\;The choice of the Gaussian process
 kernel function and its hyperparameters can have a considerable impact on the
@@ -266,38 +265,37 @@ Matern-5~\cite{gpbook} kernel function. For the first experiment, we initialize
 the algorithm with 20 random measurements and optimize the hyperparameters with
 respect to these measurements. Moreover, we re-optimize the hyperparameters at
 exponentially increasing measurement-set sizes
-(at $20\times 2^n$ samples, $n = 0, 1,\ldots$). This is done to avoid cases
-where the initially estimated hyperparameters are not accurate due to bad luck.
-On the other hand, re-optimizing the hyperparameters too often is not only
-computationally inefficient, but can also lead to worse results.
-For the second experiment, we also have a different seismographic dataset
-to our disposal, thus we compute appropriate hyperparameters for this other
-dataset and use them for our experiment (without re-optimizing).
+(at $20\times 2^n$ samples, $n = 0, 1,\ldots$).
+For the second experiment, we have another seismographic dataset
+to our disposal, so we compute appropriate hyperparameters for this
+dataset and use them in our experiment (without re-optimizing).
 
-\noindent\emph{Evaluation metric.}\;We will use three different ``metrics'' to
-measure the quality of the inferred contours. The first is classification
-accuracy of points being above or below the contour threshold. The second is
-by approximating the area of the set $\mathcal{D}\setminus\mathcal{S}$, which is
-done by again computing the classification accuracy, but only considering points
+\noindent\emph{Evaluation metric.}\;We use three different ``metrics'' to
+measure the quality of the inferred contours. The first metric is the
+classification
+accuracy of points being above or below the contour threshold. The second
+metric uses also classification accuracy, but considers only points
 outside the confidence region $\mathcal{S}$ as correctly classified.
-We will call this metric \emph{strict accuracy} and, intuitively, it measures
+We will call this metric \emph{strict accuracy}. Intuitively, it takes
+into account
 the certainty about the inferred contours according to the Gaussian process
-model. The third metric is a modified version of the Hausdorff distance, which
-is normally defined as
+model. The third metric measures topological similarity using a modified version
+of the Hausdorff distance, which is normally defined as
 $D_{hd}(\mathcal{X}, \mathcal{Y}) =
 \max\{\underset{x\in\mathcal{X}}{\max}\;\underset{y\in\mathcal{Y}}{\min}\;d(x, y),
       \underset{x\in\mathcal{X}}{\max}\;\underset{y\in\mathcal{Y}}{\min}\;d(x, y)\}$,
-where $d(x, y)$ is the Euclidean distance between $x$ and $y$.
+where $d(x, y)$ is the Euclidean distance between points $x$ and $y$.
 In our case, $\mathcal{X}$ and $\mathcal{Y}$ consist of a number of points on
 the true and inferred contours respectively (as computed by Matlab's
 \texttt{contourc}). Furthermore, to mitigate the effect of the inner maxima,
 we replace them by $L^{20}$-norms of the corresponding sets converted to
 vectors. Finally, we normalize the distance to lie in $[0, 1]$ and subtract it
-from 1 in order to get a similarity metric. We call the result
+from 1 in order to get a similarity score. We call the result
 \emph{normalized Hausdorff similarity} metric or NHDS.
 
 \subsection{Experiment 1}
-For the first experiment we used a threshold value of $h = 0$.
+In the first experiment we used a threshold value of $h = 0$, 1000 randomly
+sampled candidates per step, and $\kappa = 2$.
 \figref{fig:sin2d_steps} shows the evolution of the inferred contour and the
 confidence region for a single execution of the algorithm using the confidence
 bound heuristic. Note how the measurements gather around the true contour
@@ -308,17 +306,18 @@ errorbars have a height of two standard errors. We also depict the performance
 of random sampling as a baseline. The performance of the two heuristics seems
 to be comparable, while both are
 clearly superior to random sampling. It is also evident that the NHDS metric
-distinguishes in this case more clearly than the other metrics between
-random sampling and the two heuristics.
+distinguishes in this case more clearly between
+random sampling and the two heuristics than the other two metrics.
 
-We also evaluated the $\epsilon$-optimal conf. bound heuristic on the same
-function. The value of $\epsilon$ was chosen so that the desired contour
+We also evaluate the $\epsilon$-optimal confidence bound heuristic on the same
+function. The value of $\epsilon$ is chosen so that the desired contour
 level be the same as above, i.e.
-${\underset{x\in\mathcal{D}}{\max}\;f(x) - \epsilon = 0}$. We expect our algorithm
+${\underset{x\in\mathcal{D}}{\max}\;f(x) - \epsilon = 0}$. The algorithm is
+expected
 to be less effective when searching for an $\epsilon$-optimal contour, since
 it has to correctly infer an accurate maximum value in order to also infer
 an accurate contour. Indeed, the results of~\figref{fig:sin2d_eval_eps} are
-slightly worse than the ones of~\figref{fig:sin2d_eval}.
+somewhat worse than the ones of~\figref{fig:sin2d_eval}.
 
 \begin{figure}[tb]
   \begin{subfigure}[b]{0.5\textwidth}
@@ -368,7 +367,7 @@ slightly worse than the ones of~\figref{fig:sin2d_eval}.
     \includegraphics[width=\textwidth]{figures/sin2d_hd}
     \caption{NHDS}
   \end{subfigure}
-  \caption{Random, straddle and conf. bound heuristics evaluated on the three
+  \caption{Random, straddle and confidence bound heuristics evaluated on the three
            metrics for an increasing number of measurements
            (Experiment 1, 20 iterations).}
   \label{fig:sin2d_eval}
@@ -392,7 +391,7 @@ slightly worse than the ones of~\figref{fig:sin2d_eval}.
     \includegraphics[width=\textwidth]{figures/sin2d_eps_hd}
     \caption{NHDS}
   \end{subfigure}
-  \caption{Random and $\epsilon$-optimal conf. bound heuristics evaluated
+  \caption{Random and $\epsilon$-optimal confidence bound heuristics evaluated
            on the three metrics for an increasing number of measurements
            (Experiment 1, 20 iterations).}
   \label{fig:sin2d_eval_eps}
@@ -416,7 +415,7 @@ slightly worse than the ones of~\figref{fig:sin2d_eval}.
     \includegraphics[width=\textwidth]{figures/quake_hd}
     \caption{NHDS}
   \end{subfigure}
-  \caption{Random, straddle and conf. bound heuristics evaluated on the three
+  \caption{Random, straddle and confidence bound heuristics evaluated on the three
            metrics for an increasing number of measurements
            (Experiment 2, 20 iterations).}
   \label{fig:quake_eval}
@@ -427,16 +426,17 @@ In contrast to the previous experiment, the seismographic data of our second
 experiment consists of discrete datapoints and, thus, we have no ground
 truth contours available. Therefore, we use the inferred model from all
 available data samples as the ground truth wherever needed (for plotting and
-for evaluating the NHDS).
+for evaluating the NHDS). Furthermore, we use a threshold value of $h = 1$, every
+unused sample is a candidate at each step, and $\kappa = 2$.
 
 As before, we evaluate the performance of the algorithm using the three metrics
 and the results are shown in \figref{fig:quake_eval}. It is noteworthy that
-straddle seems to do marginally better than the conf. bound heuristic
+straddle seems to be equally effective to the confidence bound heuristic
 according to accuracy, but is dramatically worse according to the other two
 metrics. The reason for this behavior can be explained by referring to
 \figref{fig:quake_expl}. In particular, we can see that the measurements of
 the straddle heuristic are heavily concentrated on the inferred contour, while
-the rest of the region is neglected. As a consequence, the confidence region
+the rest of the domain remains unexplored. As a consequence, the confidence region
 does not decrease, which leads to worse strict accuracy scores, and the small
 contour on the top right is not detected, which results in worse NHDS scores
 (true contours far away from inferred contours are heavily penalized by the
@@ -444,15 +444,14 @@ NHDS metric). At the same time, the accuracy score is not affected by the
 above observations, because it does not take into account the confidence
 region and the effect of a few missclassified samples inside the small
 undetected contour is negligible. As can be seen in the same figure,
-the conf. bound heuristic explores enough to avoid these problems, but
-this has a negative effect on contour accuracy.
+the confidence bound heuristic explores enough to avoid these problems.
 
 The importance of this difference between the two heuristics may depend on
 the specific application. In any
-case, we can conclude that the straddle heuristic exhibit more exploitative
+case, we can conclude that the straddle heuristic exhibits more exploitative
 behavior due to its preference to sample near already inferred contours, which
 can lead to oversampling near already accurately determined contours. On the
-other hand, the conf. bound heuristic is more exploratory and, in fact, is
+other hand, the confidence bound heuristic is more exploratory and, in fact, is
 similar to maximum variance sampling in cases where the confidence region
 cannot be reduced (e.g. due to a bad choice of kernel hyperparameters).
 
@@ -467,7 +466,7 @@ cannot be reduced (e.g. due to a bad choice of kernel hyperparameters).
   \begin{subfigure}[b]{0.5\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/quake_expl_cb}
-    \caption{Conf. bound heuristic}
+    \caption{Confidence bound heuristic}
   \end{subfigure}
   \caption{Example of inferred contours and confidence regions after 200
            measurements on the seismographic data of Experiment 2.}
