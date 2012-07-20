@@ -179,7 +179,7 @@ lie inside the confidence region is chosen:
 \begin{align}\label{eq:hcb}
   h_{cb}(x) = \twopartdef { \sigma(x) } {x \in \mathcal{S}} {-\infty} {x \notin \mathcal{S}}
 \end{align}
-In other words, we exlude candidate points in the region where
+In other words, we exclude candidate points in the region where
 $f(x) < t$ with high probability (the set $\mathcal{D}\setminus\mathcal{S}_1$)
 and in the region where $f(x) > t$ with high probability
 (the set $\mathcal{D}\setminus\mathcal{S}_2$).
@@ -213,7 +213,7 @@ are defined as
   \mathcal{S}_2 &= \{x \in \mathcal{D} \mid \ell_{\kappa}(x) \leq \underset{x \in \mathcal{D}}{\max}\,u_{\kappa}(x) - \epsilon\}
 \end{align*}
 Using the same confidence region $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$
-as before, runs the risk of exluding areas where the true maximum might lie.
+as before, runs the risk of excluding areas where the true maximum might lie.
 Since the approximation
 ${\mathcal{G}^{(i)}_\epsilon = \{x \in \mathcal{D} \mid m^{(i)}(x) > \underset{x \in \mathcal{D}}{\max}\,m^{(i)}(x) - \epsilon\}}$
 of $\mathcal{G}_{\epsilon}$ at each step
@@ -347,8 +347,8 @@ somewhat worse than the ones of~\figref{fig:sin2d_eval}.
     \includegraphics[width=\textwidth]{figures/sin2d_160}
     \caption{160 measurements}
   \end{subfigure}
-  \caption{Inferred contour (orange), true contour (dark grey) and confidence
-           region $\mathcal{S}$ (light grey) for one execution of the
+  \caption{Inferred contour (orange), true contour (dark gray) and confidence
+           region $\mathcal{S}$ (light Gray) for one execution of the
            contour detection algorithm on the synthetic sinusoidal target
            function using our proposed confidence bound heuristic.}
   \label{fig:sin2d_steps}
@@ -428,11 +428,11 @@ somewhat worse than the ones of~\figref{fig:sin2d_eval}.
 
 \subsection{Experiment 2}
 In contrast to the previous experiment, the seismographic data of our second
-experiment consists of discrete datapoints and, thus, we have no ground
+experiment consists of discrete data points and, thus, we have no ground
 truth contours available. Therefore, we use the inferred model from all
 available data samples as the ground truth wherever needed (for plotting and
 for evaluating the NHDS). Furthermore, we use a threshold value of $h = 1$, every
-unsampled datapoint is a candidate at each step, and $\kappa = 2$.
+unsampled data point is a candidate at each step, and $\kappa = 2$.
 
 As before, we evaluate the performance of the algorithm using the three metrics
 and the results are shown in \figref{fig:quake_eval}. It is noteworthy that
@@ -447,7 +447,7 @@ contour on the top right is not detected, which results in worse NHDS scores
 (true contours far away from inferred contours are heavily penalized by the
 NHDS metric). At the same time, the accuracy score is not affected by the
 above observations, because it does not take into account the confidence
-region and the effect of a few missclassified samples inside the small
+region and the effect of a few misclassified samples inside the small
 undetected contour is negligible. As can be seen in the same figure,
 the confidence bound heuristic explores enough to avoid these problems.
 
