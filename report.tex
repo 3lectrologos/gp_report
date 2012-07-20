@@ -62,7 +62,7 @@ Department of Computer Science, ETH Zurich\\
 
 \begin{abstract}
 We present a novel heuristic for actively identifying function
-contours using the framework of Gaussian processes to model the underlying
+contours using Gaussian processes to model the underlying
 function and utilizing the
 inferred confidence bounds to guide the learning process. We also show how
 the proposed heuristic can be extended to identify $\epsilon$-optimal function
@@ -79,7 +79,12 @@ accurately determine the desired contours with as few samples as possible.
 This suggests using an active learning procedure that selects measurements
 over the function domain in a more efficient way than random sampling.
 
-In~\sectref{sect:algo} we formalize the active learning setting,
+We propose a new heuristic for selecting measurements in the active learning
+setting, which is based on
+determining confidence bounds for the desired contours using a Gaussian
+process to model the target function.
+In~\sectref{sect:algo} we formalize the contour detection problem via active
+learning,
 review the previously proposed \emph{straddle}~\cite{bryan2005} heuristic,
 and introduce the confidence bound heuristic, as well as its extension
 to the $\epsilon$-optimal setting. In~\sectref{sect:exp} we
@@ -184,9 +189,9 @@ and in the region where $f(x) > t$ with high probability
   \includegraphics[width=\textwidth]{figures/cb}
   \caption{A one-dimensional example showing the two sets $\mathcal{S}_1$ and
            $\mathcal{S}_2$, as well as the (shaded) confidence region
-           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$.}
+           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2$ used by the confidence
+           bound heuristic.}
   \label{fig:cb}
-  \vspace{-0.5em}
 \end{figure}
 
 From the above definitions it follows that 
@@ -231,9 +236,9 @@ in~\eqtref{eq:hcb}.
   \caption{A one-dimensional example showing the three sets $\mathcal{S}_1$,
            $\mathcal{S}_2$ and $\mathcal{S}_3$, as well as
            the (shaded) confidence region
-           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2\cup\mathcal{S}_3$.}
+           $\mathcal{S} = \mathcal{S}_1\cap\mathcal{S}_2\cup\mathcal{S}_3$
+           used by the $\epsilon$-optimal confidence bound heuristic.}
   \label{fig:cbe}
-  \vspace{-0.5em}
 \end{figure}
 
 \section{Experiments} \label{sect:exp}
@@ -427,7 +432,7 @@ experiment consists of discrete datapoints and, thus, we have no ground
 truth contours available. Therefore, we use the inferred model from all
 available data samples as the ground truth wherever needed (for plotting and
 for evaluating the NHDS). Furthermore, we use a threshold value of $h = 1$, every
-unused sample is a candidate at each step, and $\kappa = 2$.
+unsampled datapoint is a candidate at each step, and $\kappa = 2$.
 
 As before, we evaluate the performance of the algorithm using the three metrics
 and the results are shown in \figref{fig:quake_eval}. It is noteworthy that
